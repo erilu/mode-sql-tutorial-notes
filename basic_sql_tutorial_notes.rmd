@@ -1,0 +1,132 @@
+---
+title: "Basic SQL Tutorial Notes"
+output: html_document
+---
+
+# Basic SQL Tutorial Notes
+
+As a way to practice SQL and tidyverse at the same time, I'll draw parallels between commands from the Mode SQL tutorial and the equivalent command using dplyr.
+
+## SELECT
+
+### Select specific columns from table
+
+```{sql}
+SELECT year,
+       month,
+       west
+  FROM tutorial.us_housing_units
+```
+
+```{r}
+# dplyr
+tutorial.us_housing_units %>% select (year,month,west)
+# base r
+tutorial.us_housing_units[,c("year","month","west")]
+
+```
+
+Note that there is no comma after "west", the last column selected from tutorial.us_housing_units. If a comma is put after west, the command will error. FROM must come after SELECT. Also, SELECT and FROM don't need to be capitalized but the convention is to capitalize them. The indentation is also optional, but makes things easier to read.
+
+### Select all columns from table
+
+```{sql}
+SELECT *
+  FROM tutorial.us_housing_units
+
+--equivalent SQL command
+SELECT year,
+       month,
+       month_name,
+       west,
+       midwest,
+       south,
+       northeast
+  FROM tutorial.us_housing_units
+```
+
+```{r}
+# just running the name of table itself will return everything
+tutorial.us_housing_units
+
+# or manually select all columns
+tutorial.us_housing_units %>% select (year,month,month_name,west,midwest,south,northeast)
+```
+
+### Rename columns from a selection
+
+```{sql}
+SELECT west AS West_Region,
+       south AS South_Region
+  FROM tutorial.us_housing_units
+```
+
+Note - if not put in double quotes, the command above will return columns all lowercase (e.g. west_region).
+
+```{r}
+# use the select and rename functions in dplyr
+tutorial.us_housing_units %>% 
+  select(west,south) %>%
+  rename ("west_region" = west,
+          "south_region" = south)
+```
+
+```{sql}
+SELECT year AS "Year",
+       month AS "Month",
+       month_name AS "Month Name",
+       west AS "West",
+       midwest AS "Midwest",
+       south AS "South",
+       northeast AS "Northeast"
+  FROM tutorial.us_housing_units
+```
+
+```{r}
+
+tutorial.us_housing_units %>% rename ("Year" = year, 
+                                      "Month" = month,
+                                      "Month Name" = month_name,
+                                      "West" = west,
+                                      "Midwest"=midwest,
+                                      "South" = south,
+                                      "Northeast" = northeast)
+
+```
+
+## LIMIT
+
+# Apply a limit to only return first 15 rows of data
+
+```{sql}
+SELECT *
+  FROM tutorial.us_housing_units
+ LIMIT 15
+```
+
+```{r}
+# use the head function
+tutorial.us_housing_units %>% head(15)
+```
+
+Important note - LIMIT must come after FROM, or else it will error.
+
+## WHERE
+
+```{sql}
+SELECT *
+  FROM tutorial.us_housing_units
+ WHERE month = 1
+```
+
+Important note - the clauses always need to be in this order: SELECT, FROM, WHERE.
+Be careful with distinction between R / SQL in which SQL uses just one '=' and R requires '=='
+
+```{r}
+# be careful 
+tutorial.us_housing_units %>% filter (month == 1)
+```
+
+
+
+
