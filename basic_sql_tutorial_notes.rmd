@@ -94,6 +94,9 @@ tutorial.us_housing_units %>% rename ("Year" = year,
 
 ```
 
+Note - single quotes are different than double quotes - if you use single quotes for year AS 'Year', you will get an error.
+
+
 ## LIMIT
 
 # Apply a limit to only return first 15 rows of data
@@ -119,13 +122,119 @@ SELECT *
  WHERE month = 1
 ```
 
-Important note - the clauses always need to be in this order: SELECT, FROM, WHERE.
+The clauses always need to be in this order: SELECT, FROM, WHERE.
 Be careful with distinction between R / SQL in which SQL uses just one '=' and R requires '=='
 
 ```{r}
-# be careful 
 tutorial.us_housing_units %>% filter (month == 1)
 ```
+
+Note - again, single quotes are different than double quotes - if you use single quotes for the character, such as writing WHERE month_name > "J", this will error.
+
+## Did the West Region ever produce more than 50,000 housing units in one month?
+
+```{sql}
+SELECT *
+  FROM tutorial.us_housing_units
+  WHERE west > 50
+```
+
+Running this query returns 3 rows where the west region has produced more than 50,000 units (greater than value of 50 in the table).
+
+```{r}
+# this will evaluate to TRUE if there are any records with more than 50000 units in west region
+# calculates the number of rows after filtering the dataset, and tests whether it is greater than 0
+nrow(tutorial.us_housing_units %>% filter(west>50)) > 0
+```
+
+## Did the South Region ever produce 20,000 or fewer housing units in one month?
+
+```{sql}
+SELECT *
+  FROM tutorial.us_housing_units
+  WHERE south <= 20
+```
+
+There were 4 months where the south region produced less than 20,000 units.
+
+## Write a query that only shows rows for which the month name is February.
+
+```{r}
+SELECT *
+  FROM tutorial.us_housing_units
+  WHERE month_name = 'February'
+```
+
+## Write a query that only shows rows for which the month_name starts with the letter "N" or an earlier letter in the alphabet.
+
+```{r}
+SELECT *
+  FROM tutorial.us_housing_units
+  WHERE month_name < 'o'
+```
+
+
+## Arithmetic on columns
+
+```{r}
+SELECT year,
+       month,
+       west,
+       south,
+       west + south AS south_plus_west
+  FROM tutorial.us_housing_units
+```
+
+```{r}
+tutorial.us_housing_units %>% select (year,month,west,south) %>% mutate (south_plus_west = west + south)
+```
+
+## Write a query that calculates the sum of all four regions in a separate column.
+
+```{r}
+SELECT year,
+       month,
+       west,
+       south,
+       northeast,
+       midwest,
+       west + south + northeast + midwest AS sum_territories
+  FROM tutorial.us_housing_units
+  
+```
+
+## Write a query that returns all rows for which more units were produced in the West region than in the Midwest and Northeast combined.
+
+```{r}
+SELECT *
+  FROM tutorial.us_housing_units
+  WHERE west > (midwest +northeast)
+```
+
+Tried to make a new column and then filter on it, but didn't work (don't do the below):
+
+```{r}
+SELECT *,
+       midwest+northeast AS mid_and_north
+  FROM tutorial.us_housing_units
+  WHERE west > mid_and_north
+```
+
+
+## Write a query that calculates the percentage of all houses completed in the United States represented by each region. Only return results from the year 2000 and later.
+
+Hint: There should be four columns of percentages.
+
+```{sql}
+SELECT *,
+       west/(west+south+midwest+northeast)*100 AS west_percent,
+       south/(west+south+midwest+northeast)*100 AS south_percent,
+       northeast/(west+south+midwest+northeast)*100 AS northeast_percent,
+       midwest/(west+south+midwest+northeast)*100 AS midwest_percent
+  FROM tutorial.us_housing_units
+  WHERE year >= 2000
+```
+
 
 
 
