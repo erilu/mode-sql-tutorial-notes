@@ -235,6 +235,116 @@ SELECT *,
   WHERE year >= 2000
 ```
 
+# LIKE
+
+```{sql}
+SELECT *
+  FROM tutorial.billboard_top_100_year_end
+ WHERE "group" LIKE 'Snoop%'
+```
+
+Similar to grepping in R, which uses regexes to return all indicies in a vector that contain a matching character set.
+
+```{r}
+tutorial.billboard_top_100_year_end[grep("^Snoop", tutorial.billboard_top_100_year_end),]
+```
+
+% in SQL is similar to (.*) in regexes, in that it will recognize any character or set of characters
+
+## ILIKE (LIKE that ignores case)
+
+```{sql}
+SELECT *
+  FROM tutorial.billboard_top_100_year_end
+ WHERE "group" ILIKE 'snoop%'
+```
+
+## Write a query that returns all rows for which Ludacris was a member of the group.
+
+```{sql}
+SELECT *
+  FROM tutorial.billboard_top_100_year_end
+ WHERE "group" ILIKE '%ludacris%'
+```
+
+## Write a query that returns all rows for which the first artist listed in the group has a name that begins with "DJ".
+
+```{sql}
+SELECT *
+  FROM tutorial.billboard_top_100_year_end
+ WHERE "group" LIKE 'DJ%'
+```
+
+
+# IN
+
+```{sql}
+SELECT *
+  FROM tutorial.billboard_top_100_year_end
+ WHERE year_rank IN (1, 2, 3)
+
+# command above returns the same thing as: 
+SELECT *
+  FROM tutorial.billboard_top_100_year_end
+ WHERE year_rank = 1 OR year_rank = 2 OR year_rank = 3
+```
+
+## Write a query that shows all of the entries for Elvis and M.C. Hammer.
+
+```{sql}
+SELECT *
+  FROM tutorial.billboard_top_100_year_end
+ WHERE "group" ILIKE '%hammer%'
+ 
+--looks like M.C. Hammer is also listed as just Hammer as well, so our IN statement needs both
+ 
+SELECT *
+  FROM tutorial.billboard_top_100_year_end
+ WHERE artist IN ('Elvis Presley','M.C. Hammer', 'Hammer')
+```
+
+In R, using %in% will return TRUE or FALSE for each element of a vector that is in the designated set, which can then be used to filter the rows of the data frame.
+
+```{r}
+tutorial.billboard_top_100_year_end %>% filter (artist %in% c('Elvis Presley','M.C. Hammer', 'Hammer'))
+
+tutorial.billboard_top_100_year_end[tutorial.billboard_top_100_year_end$artist %in% c('Elvis Presley','M.C. Hammer', 'Hammer'), ]
+```
+
+
+# BETWEEN
+
+```{sql}
+SELECT *
+  FROM tutorial.billboard_top_100_year_end
+ WHERE year_rank BETWEEN 5 AND 10
+ 
+ -- is the same as the query below:
+   
+SELECT *
+  FROM tutorial.billboard_top_100_year_end
+ WHERE year_rank >= 5 AND year_rank <= 10
+```
+
+
+### Write a query that shows all top 100 songs from January 1, 1985 through December 31, 1990.
+
+```{sql}
+SELECT *
+  FROM tutorial.billboard_top_100_year_end
+ WHERE year BETWEEN 1985 AND 1990
+```
+
+
+
+
+
+
+
+
+
+
+
 
 
 
