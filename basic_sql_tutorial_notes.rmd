@@ -7,6 +7,13 @@ output: html_document
 
 As a way to practice SQL and tidyverse at the same time, I'll draw parallels between commands from the Mode SQL tutorial and the equivalent command using dplyr.
 
+```{r}
+# load Mode SQL tutorial datasets into R for comparison
+tutorial.us_housing_units <- read.csv ("tutorial_us_housing.csv", header = T, stringsAsFactors = F)
+tutorial.billboard_top_100_year_end <- read.csv ("tutorial_billboard_top_100.csv", header = T, stringsAsFactors = F)
+```
+
+
 ## SELECT
 
 ### Select specific columns from table
@@ -336,13 +343,44 @@ SELECT *
 ```
 
 
+# IS NULL
 
+## Write a query that shows all of the rows for which song_name is null.
 
+```{sql}
+SELECT *
+  FROM tutorial.billboard_top_100_year_end
+ WHERE song_name IS NULL
+```
 
+# SQL AND
 
+## Write a query that surfaces all rows for top-10 hits for which Ludacris is part of the Group.
 
+```{sql}
+SELECT *
+  FROM tutorial.billboard_top_100_year_end
+ WHERE year_rank <= 10
+   AND "group" ILIKE '%ludacris%'
+```
 
+## Write a query that surfaces the top-ranked records in 1990, 2000, and 2010.
 
+```{sql}}
+SELECT *
+  FROM tutorial.billboard_top_100_year_end
+ WHERE year_rank = 1
+   AND year IN (1990,2000,2010)
+```
+
+## Write a query that lists all songs from the 1960s with "love" in the title.
+
+```{sql}
+SELECT *
+  FROM tutorial.billboard_top_100_year_end
+ WHERE year BETWEEN 1960 AND 1969
+   AND song_name ILIKE '%love%'
+```
 
 
 
