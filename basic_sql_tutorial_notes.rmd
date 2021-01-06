@@ -413,11 +413,72 @@ SELECT *
    AND (year < 2001 OR year > 2009)
 ```
 
+# SQL NOT
 
 
+```{sql}
+SELECT *
+  FROM tutorial.billboard_top_100_year_end
+ WHERE year = 2013
+   AND year_rank NOT BETWEEN 2 AND 3
+
+--is the same as:
+SELECT *
+  FROM tutorial.billboard_top_100_year_end
+ WHERE year = 2013
+   AND (year_rank < 2 OR year_rank > 3)
+```
 
 
+## Write a query that returns all rows for songs that were on the charts in 2013 and do not contain the letter "a".
+
+```{sql}
+SELECT *
+  FROM tutorial.billboard_top_100_year_end
+ WHERE year = 2013
+   AND song_name NOT ILIKE '%a%'
+```
+
+# SQL ORDER BY
+
+## Write a query that returns all rows from 2012, ordered by song title from Z to A.
+
+```{sql}
+SELECT *
+  FROM tutorial.billboard_top_100_year_end
+ WHERE year = 2012
+ORDER BY song_name DESC
+```
 
 
+## Write a query that returns all rows from 2010 ordered by rank, with artists ordered alphabetically for each song.
+
+```{sql}
+SELECT *
+  FROM tutorial.billboard_top_100_year_end
+ WHERE year = 2010
+ORDER BY year_rank, artist
+```
+
+
+## Write a query that shows all rows for which T-Pain was a group member, ordered by rank on the charts, from lowest to highest rank (from 100 to 1).
+
+```{sql}
+SELECT *
+  FROM tutorial.billboard_top_100_year_end
+ WHERE "group" ILIKE '%t-pain%'
+ORDER BY year_rank DESC
+```
+
+
+## Write a query that returns songs that ranked between 10 and 20 (inclusive) in 1993, 2003, or 2013. Order the results by year and rank, and leave a comment on each line of the WHERE clause to indicate what that line does
+
+```{sql}
+SELECT *
+  FROM tutorial.billboard_top_100_year_end
+ WHERE year_rank BETWEEN 10 AND 20 -- this selects songs between 10 and 20, inclusive
+ AND year IN (1993, 2003, 2013) -- this filters for songs in 1993, 2003, and 2013
+ORDER BY year, year_rank -- this orders the results by year and rank
+```
 
 
