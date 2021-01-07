@@ -1,0 +1,90 @@
+---
+title: "Intermediate SQL Tutorial Notes"
+output: html_document
+---
+
+# Intermediate SQL Tutorial Notes
+
+# SQL COUNT
+
+## Write a query to count the number of non-null rows in the low column.
+
+```{sql}
+SELECT COUNT(low) AS count_low
+  FROM tutorial.aapl_historical_stock_price
+```
+
+## Write a query that determines counts of every single column. Which column has the most null values?
+
+```{sql}
+SELECT COUNT(date) AS count_date,
+       COUNT(year) AS count_year,
+       COUNT(month) AS count_month,
+       COUNT(open) AS count_open,
+       COUNT(high) AS count_high,
+       COUNT(low) AS count_low,
+       COUNT(close) AS count_close,
+       COUNT(volume) AS count_volume,
+       COUNT(id) AS count_id
+  FROM tutorial.aapl_historical_stock_price
+
+-- column high has the most null values
+```
+
+# SQL SUM
+
+## Write a query to calculate the average opening price (hint: you will need to use both COUNT and SUM, as well as some simple arithmetic.).
+
+```{sql}
+SELECT SUM(open) / COUNT(open) AS avg_open
+  FROM tutorial.aapl_historical_stock_price
+```
+
+# SQL MIN/MAX
+
+## What was Apple's lowest stock price (at the time of this data collection)?
+
+```{sql}
+SELECT MIN(low) AS min_low
+  FROM tutorial.aapl_historical_stock_price
+```
+
+## What was the highest single-day increase in Apple's share value?
+
+```{sql}
+SELECT MAX(close - open) AS max_increase
+  FROM tutorial.aapl_historical_stock_price
+```
+
+# SQL AVG
+
+## 
+
+```{sql}
+
+```
+
+```{sql}
+
+```
+
+```{sql}
+
+```
+
+```{sql}
+
+```
+
+```{sql}
+
+```
+
+```{sql}
+
+```
+
+```{sql}
+
+```
+
