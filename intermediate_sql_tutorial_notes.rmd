@@ -104,6 +104,81 @@ SELECT year,
 # SQL HAVING
 
 ```{sql}
+SELECT year,
+       month,
+       MAX(high) AS month_high
+  FROM tutorial.aapl_historical_stock_price
+ GROUP BY year, month
+HAVING MAX(high) > 400
+ ORDER BY year, month
+```
+
+If you wanted to filter the year or month, you could add the condition to the HAVING using AND, or use a WHERE clause as well:
+
+```{sql}
+SELECT year,
+       month,
+       MAX(high) AS month_high
+  FROM tutorial.aapl_historical_stock_price
+ GROUP BY year, month
+HAVING MAX(high) > 400 AND month > 8
+ ORDER BY year, month
+```
+
+```{sql}
+SELECT year,
+       month,
+       MAX(high) AS month_high
+  FROM tutorial.aapl_historical_stock_price
+  WHERE month > 8
+ GROUP BY year, month
+HAVING MAX(high) > 400
+ ORDER BY year, month
+```
+
+Order must be:
+
+1. SELECT
+2. FROM
+3. WHERE
+4. GROUP BY
+5. HAVING
+6. ORDER BY
+
+# SQL CASE
+
+## Write a query that includes a column that is flagged "yes" when a player is from California, and sort the results with those players first.
+
+```{sql}
+SELECT player_name,
+       state,
+       CASE WHEN state = 'CA' THEN 'yes'
+       ELSE 'no' END AS is_in_california
+  FROM benn.college_football_players
+  ORDER BY is_in_california DESC
+```
+
+```{sql}
+
+```
+
+```{sql}
+
+```
+
+```{sql}
+
+```
+
+```{sql}
+
+```
+
+```{sql}
+
+```
+
+```{sql}
 
 ```
 
