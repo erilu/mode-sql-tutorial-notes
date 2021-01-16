@@ -185,12 +185,28 @@ SELECT *,
   FROM benn.college_football_players
 ```
 
-```{sql}
+## Write a query that counts the number of 300lb+ players for each of the following regions: West Coast (CA, OR, WA), Texas, and Other (Everywhere else).
 
+```{sql}
+SELECT CASE WHEN weight >= 300 THEN 'greater_than_300'
+       ELSE '300_or_less' END AS weight_class,
+       CASE WHEN state IN ('CA', 'OR', 'WA') THEN 'west_coast'
+            WHEN state = 'TX' THEN 'texas'
+            ELSE 'other' END AS location,
+       COUNT (1) AS player_count
+       FROM benn.college_football_players
+       GROUP BY 1,2
 ```
 
+The answer provided by the tutorial only gives those above, and not those below as well, because it uses WHERE instead of having a separate weight CASE and grouping sequentially.
 ```{sql}
-
+SELECT CASE WHEN state IN ('CA', 'OR', 'WA') THEN 'West Coast'
+            WHEN state = 'TX' THEN 'Texas'
+            ELSE 'Other' END AS arbitrary_regional_designation,
+            COUNT(1) AS players
+  FROM benn.college_football_players
+ WHERE weight >= 300
+ GROUP BY 1
 ```
 
 ```{sql}
