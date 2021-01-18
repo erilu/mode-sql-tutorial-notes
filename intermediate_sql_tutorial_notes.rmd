@@ -209,6 +209,76 @@ SELECT CASE WHEN state IN ('CA', 'OR', 'WA') THEN 'West Coast'
  GROUP BY 1
 ```
 
+## Write a query that calculates the combined weight of all underclass players (FR/SO) in California as well as the combined weight of all upperclass players (JR/SR) in California.
+
+```{sql}
+SELECT CASE WHEN year IN ('FR', 'SO') THEN 'underclass'
+            WHEN year IN ('JR','SR')  THEN 'upperclass'
+            ELSE NULL END AS player_class,
+       SUM (weight) AS combined_weight
+  FROM benn.college_football_players
+  WHERE state = 'CA'
+  GROUP BY 1
+```
+
+
+## Write a query that displays the number of players in each state, with FR, SO, JR, and SR players in separate columns and another column for the total number of players. Order results such that states with the most players come first.
+
+```{sql}
+SELECT state,
+       COUNT(CASE WHEN year = 'FR' THEN 1 ELSE NULL END) AS fr_count,
+       COUNT(CASE WHEN year = 'SO' THEN 1 ELSE NULL END) AS so_count,
+       COUNT(CASE WHEN year = 'JR' THEN 1 ELSE NULL END) AS jr_count,
+       COUNT(CASE WHEN year = 'SR' THEN 1 ELSE NULL END) AS sr_count,
+       COUNT(year) AS total_count
+  FROM benn.college_football_players
+  GROUP BY state
+  ORDER BY total_count DESC
+```
+
+## Write a query that shows the number of players at schools with names that start with A through M, and the number at schools with names starting with N - Z.
+
+```{sql}
+-- note that this is wrong because <'N' is not equivalent to BETWEEN 'A' AND 'M', beacuse words like "Memphis" are not <='M', because they contain more letters after M. As this is, it will only work if hte school name is just the letter 'M'. The proper way to do this is <'N', which will capture any word starting with M.
+SELECT CASE WHEN school_name BETWEEN 'A' AND 'M' THEN 'a-m'
+            WHEN school_name BETWEEN 'N' AND 'Z' THEN 'n-z'
+            ELSE 'no_name' END AS school_alphabet_class,
+       count(school_name) AS school_alphabet_name_count
+       FROM benn.college_football_players
+       GROUP BY 1
+        
+
+a-m	11278
+no_name	2508
+n-z	12512
+```
+
+
+
+
+```{sql}
+SELECT COUNT(CASE WHEN school_name BETWEEN 'A' AND 'M' THEN 'a-m' ELSE NULL END) AS a_m_count,
+       COUNT(CASE WHEN school_name BETWEEN 'N' AND 'Z' THEN 'n-z' ELSE NULL END) AS n_z_count
+       FROM benn.college_football_players
+       
+```
+
+```{sql}
+
+```
+
+```{sql}
+
+```
+
+```{sql}
+
+```
+
+```{sql}
+
+```
+
 ```{sql}
 
 ```
