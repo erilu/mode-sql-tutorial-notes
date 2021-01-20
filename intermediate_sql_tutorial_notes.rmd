@@ -251,29 +251,56 @@ SELECT CASE WHEN school_name BETWEEN 'A' AND 'M' THEN 'a-m'
 a-m	11278
 no_name	2508
 n-z	12512
+
+SELECT CASE WHEN school_name < 'N' THEN 'a-m'
+            WHEN school_name >= 'N' THEN 'n-z'
+            ELSE 'no_name' END AS school_alphabet_class,
+       count(school_name) AS school_alphabet_name_count
+       FROM benn.college_football_players
+       GROUP BY 1
+        
+
 ```
 
 
-
-
 ```{sql}
-SELECT COUNT(CASE WHEN school_name BETWEEN 'A' AND 'M' THEN 'a-m' ELSE NULL END) AS a_m_count,
-       COUNT(CASE WHEN school_name BETWEEN 'N' AND 'Z' THEN 'n-z' ELSE NULL END) AS n_z_count
+SELECT COUNT(CASE WHEN school_name < 'N' THEN 'a-m' ELSE NULL END) AS a_m_count,
+       COUNT(CASE WHEN school_name >= 'N' THEN 'n-z' ELSE NULL END) AS n_z_count
        FROM benn.college_football_players
        
 ```
 
+# SQL DISTINCT
+
+## Write a query that returns the unique values in the year column, in chronological order.
+
 ```{sql}
+SELECT DISTINCT year
+  FROM tutorial.aapl_historical_stock_price
+  ORDER BY year
+```
+
+## Write a query that counts the number of unique values in the month column for each year.
+
+```{sql}
+SELECT year,
+  COUNT(DISTINCT month) AS distinct_months
+  FROM tutorial.aapl_historical_stock_price
+  GROUP BY year
 
 ```
 
+## Write a query that separately counts the number of unique values in the month column and the number of unique values in the `year` column.
+
 ```{sql}
+SELECT 
+  COUNT(DISTINCT year) AS distinct_years,
+  COUNT(DISTINCT month) AS distinct_months
+  FROM tutorial.aapl_historical_stock_price
 
 ```
 
-```{sql}
 
-```
 
 ```{sql}
 
