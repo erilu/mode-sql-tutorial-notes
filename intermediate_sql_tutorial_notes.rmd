@@ -375,3 +375,62 @@ SELECT COUNT(companies.permalink) AS num_companies,
   JOIN tutorial.crunchbase_acquisitions acquisitions
     ON companies.permalink = acquisitions.company_permalink
 ```
+
+## Modify the query above to be a LEFT JOIN. Note the difference in results.
+
+```{sql}
+SELECT COUNT(companies.permalink) AS num_companies,
+       COUNT(acquisitions.company_permalink) AS num_acquisitions
+  FROM tutorial.crunchbase_companies companies
+  LEFT JOIN tutorial.crunchbase_acquisitions acquisitions
+    ON companies.permalink = acquisitions.company_permalink
+    
+-- 27355	1673
+-- since left join retains all the entries within the "left" table (companies), the count includes all the non-null entries of companies
+```
+
+## Count the number of unique companies (don't double-count companies) and unique acquired companies by state. Do not include results for which there is no state data, and order by the number of acquired companies from highest to lowest.
+
+```{sql}
+SELECT companies.state_code,
+       COUNT(DISTINCT companies.permalink) AS num_companies,
+       COUNT(DISTINCT acquisitions.company_permalink) AS num_acquisitions
+  FROM tutorial.crunchbase_companies companies
+  LEFT JOIN tutorial.crunchbase_acquisitions acquisitions
+    ON companies.permalink = acquisitions.company_permalink
+    WHERE companies.state_code IS NOT NULL
+    GROUP BY state_code
+    ORDER BY num_acquisitions DESC
+
+```
+
+## 
+
+```{sql}
+
+```
+
+## 
+
+```{sql}
+
+```
+
+
+## 
+
+```{sql}
+
+```
+
+
+## 
+
+```{sql}
+
+```
+
+
+
+
+
