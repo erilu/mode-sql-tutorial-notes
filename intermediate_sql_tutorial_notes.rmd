@@ -340,7 +340,11 @@ SELECT players.player_name,
     WHERE teams.division = 'FBS (Division I-A Teams)'
 ```
 
-## SQL OUTER JOIN
+# SQL OUTER JOINS
+
+This section introduces the concept of outer joins (which include LEFT JOIN, RIGHT JOIN, and FULL OUTER JOIN), and looks at the crunchbase dataset.
+
+# SQL LEFT JOIN
 
 ## Example from the Left Join section
 
@@ -399,14 +403,25 @@ SELECT companies.state_code,
   LEFT JOIN tutorial.crunchbase_acquisitions acquisitions
     ON companies.permalink = acquisitions.company_permalink
     WHERE companies.state_code IS NOT NULL
-    GROUP BY state_code
+    GROUP BY companies.state_code
     ORDER BY num_acquisitions DESC
 
 ```
 
-## 
+# RIGHT JOIN
+
+## Rewrite the previous practice query in which you counted total and acquired companies by state, but with a RIGHT JOIN instead of a LEFT JOIN. The goal is to produce the exact same results.
 
 ```{sql}
+SELECT companies.state_code,
+       COUNT(DISTINCT companies.permalink) AS num_companies,
+       COUNT(DISTINCT acquisitions.company_permalink) AS num_acquisitions
+  FROM tutorial.crunchbase_acquisitions acquisitions
+  RIGHT JOIN tutorial.crunchbase_companies companies
+    ON companies.permalink = acquisitions.company_permalink
+    WHERE companies.state_code IS NOT NULL
+    GROUP BY companies.state_code
+    ORDER BY num_acquisitions DESC
 
 ```
 
