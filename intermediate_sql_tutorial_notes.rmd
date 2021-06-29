@@ -425,19 +425,51 @@ SELECT companies.state_code,
 
 ```
 
-## 
+# SQL Joins Using WHERE or ON
+
+## Write a query that shows a company's name, "status" (found in the Companies table), and the number of unique investors in that company. Order by the number of investors from most to fewest. Limit to only companies in the state of New York.
 
 ```{sql}
+-- explore the columns in the joined table
+
+SELECT companies.*,
+       investments.*
+  FROM tutorial.crunchbase_companies companies
+  LEFT JOIN tutorial.crunchbase_investments investments
+    ON companies.permalink = investments.company_permalink
+
+-- write the query once we know which columns to use
+SELECT companies.name AS company_name,
+       companies.status AS company_status,
+       companies.state_code,
+       COUNT(DISTINCT investments.investor_permalink) AS num_distinct_investors
+  FROM tutorial.crunchbase_companies companies
+  LEFT JOIN tutorial.crunchbase_investments investments
+    ON companies.permalink = investments.company_permalink
+  WHERE companies.state_code = 'NY'
+  GROUP BY 1,2,3
+  ORDER BY 4 DESC
 
 ```
 
-
-## 
+## Write a query that lists investors based on the number of companies in which they are invested. Include a row for companies with no investor, and order from most companies to least.
 
 ```{sql}
-
+SELECT CASE WHEN investments.investor_name IS NULL THEN 'no_investors'
+       ELSE investments.investor_name END AS investor_description,
+       COUNT(DISTINCT companies.permalink) AS num_distinct_companies
+  FROM tutorial.crunchbase_companies companies
+  LEFT JOIN tutorial.crunchbase_investments investments
+    ON companies.permalink = investments.company_permalink
+  GROUP BY 1
+  ORDER BY 2 DESC
+  
+  
+  -- for this one, had to remember to use CASE WHEN IS NULL in order to generate a new column that will have a non-null entry for the rows without an investor
+  -- there are also some investment rows that do not have a corresponding company in the company table (see RIGHT JOINing onto crunchbase_investments)
 ```
 
+# SQL FULL OUTER JOIN
 
 ## 
 
