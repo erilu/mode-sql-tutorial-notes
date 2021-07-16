@@ -1,20 +1,19 @@
 ---
-title: "Basic SQL Tutorial Notes"
+title: "Basic SQL Tutorial Exercises and Notes"
 output: html_document
 ---
 
-# Basic SQL Tutorial Notes
+# Basic SQL Tutorial Exercises and Notes
 
-As a way to practice SQL and tidyverse at the same time, I'll draw parallels between commands from the Mode SQL tutorial and the equivalent command using dplyr.
+As a way to practice SQL and tidyverse at the same time, I'll draw parallels between commands from the Mode SQL tutorial and the equivalent command using dplyr (work in progress). I plan to first finish the SQL exercises and come back to write out the equivalent dplyr commands.
 
 ```{r}
 # load Mode SQL tutorial datasets into R for comparison
-tutorial.us_housing_units <- read.csv ("tutorial_us_housing.csv", header = T, stringsAsFactors = F)
-tutorial.billboard_top_100_year_end <- read.csv ("tutorial_billboard_top_100.csv", header = T, stringsAsFactors = F)
+tutorial.us_housing_units <- read.csv ("datasets/tutorial_us_housing.csv", header = T, stringsAsFactors = F)
+tutorial.billboard_top_100_year_end <- read.csv ("datasets/tutorial_billboard_top_100.csv", header = T, stringsAsFactors = F)
 ```
 
-
-## SELECT
+## SQL SELECT
 
 ### Select specific columns from table
 
@@ -30,7 +29,6 @@ SELECT year,
 tutorial.us_housing_units %>% select (year,month,west)
 # base r
 tutorial.us_housing_units[,c("year","month","west")]
-
 ```
 
 Note that there is no comma after "west", the last column selected from tutorial.us_housing_units. If a comma is put after west, the command will error. FROM must come after SELECT. Also, SELECT and FROM don't need to be capitalized but the convention is to capitalize them. The indentation is also optional, but makes things easier to read.
@@ -104,9 +102,9 @@ tutorial.us_housing_units %>% rename ("Year" = year,
 Note - single quotes are different than double quotes - if you use single quotes for year AS 'Year', you will get an error.
 
 
-## LIMIT
+## SQL LIMIT
 
-# Apply a limit to only return first 15 rows of data
+### Apply a limit to only return first 15 rows of data
 
 ```{sql}
 SELECT *
@@ -121,7 +119,7 @@ tutorial.us_housing_units %>% head(15)
 
 Important note - LIMIT must come after FROM, or else it will error.
 
-## WHERE
+## SQL WHERE
 
 ```{sql}
 SELECT *
@@ -138,7 +136,7 @@ tutorial.us_housing_units %>% filter (month == 1)
 
 Note - again, single quotes are different than double quotes - if you use single quotes for the character, such as writing WHERE month_name > "J", this will error.
 
-## Did the West Region ever produce more than 50,000 housing units in one month?
+### Did the West Region ever produce more than 50,000 housing units in one month?
 
 ```{sql}
 SELECT *
@@ -154,7 +152,7 @@ Running this query returns 3 rows where the west region has produced more than 5
 nrow(tutorial.us_housing_units %>% filter(west>50)) > 0
 ```
 
-## Did the South Region ever produce 20,000 or fewer housing units in one month?
+### Did the South Region ever produce 20,000 or fewer housing units in one month?
 
 ```{sql}
 SELECT *
@@ -164,26 +162,26 @@ SELECT *
 
 There were 4 months where the south region produced less than 20,000 units.
 
-## Write a query that only shows rows for which the month name is February.
+### Write a query that only shows rows for which the month name is February.
 
-```{r}
+```{sql}
 SELECT *
   FROM tutorial.us_housing_units
   WHERE month_name = 'February'
 ```
 
-## Write a query that only shows rows for which the month_name starts with the letter "N" or an earlier letter in the alphabet.
+### Write a query that only shows rows for which the month_name starts with the letter "N" or an earlier letter in the alphabet.
 
-```{r}
+```{sql}
 SELECT *
   FROM tutorial.us_housing_units
   WHERE month_name < 'o'
 ```
 
 
-## Arithmetic on columns
+## SQL Comparison Operators
 
-```{r}
+```{sql}
 SELECT year,
        month,
        west,
@@ -196,9 +194,9 @@ SELECT year,
 tutorial.us_housing_units %>% select (year,month,west,south) %>% mutate (south_plus_west = west + south)
 ```
 
-## Write a query that calculates the sum of all four regions in a separate column.
+### Write a query that calculates the sum of all four regions in a separate column.
 
-```{r}
+```{sql}
 SELECT year,
        month,
        west,
@@ -210,9 +208,9 @@ SELECT year,
   
 ```
 
-## Write a query that returns all rows for which more units were produced in the West region than in the Midwest and Northeast combined.
+### Write a query that returns all rows for which more units were produced in the West region than in the Midwest and Northeast combined.
 
-```{r}
+```{sql}
 SELECT *
   FROM tutorial.us_housing_units
   WHERE west > (midwest +northeast)
@@ -220,7 +218,7 @@ SELECT *
 
 Tried to make a new column and then filter on it, but didn't work (don't do the below):
 
-```{r}
+```{sql}
 SELECT *,
        midwest+northeast AS mid_and_north
   FROM tutorial.us_housing_units
@@ -228,7 +226,7 @@ SELECT *,
 ```
 
 
-## Write a query that calculates the percentage of all houses completed in the United States represented by each region. Only return results from the year 2000 and later.
+### Write a query that calculates the percentage of all houses completed in the United States represented by each region. Only return results from the year 2000 and later.
 
 Hint: There should be four columns of percentages.
 
@@ -242,7 +240,7 @@ SELECT *,
   WHERE year >= 2000
 ```
 
-# LIKE
+## SQL LIKE
 
 ```{sql}
 SELECT *
@@ -258,7 +256,7 @@ tutorial.billboard_top_100_year_end[grep("^Snoop", tutorial.billboard_top_100_ye
 
 % in SQL is similar to (.*) in regexes, in that it will recognize any character or set of characters
 
-## ILIKE (LIKE that ignores case)
+## SQL ILIKE (LIKE that ignores case)
 
 ```{sql}
 SELECT *
@@ -266,7 +264,7 @@ SELECT *
  WHERE "group" ILIKE 'snoop%'
 ```
 
-## Write a query that returns all rows for which Ludacris was a member of the group.
+### Write a query that returns all rows for which Ludacris was a member of the group.
 
 ```{sql}
 SELECT *
@@ -274,7 +272,7 @@ SELECT *
  WHERE "group" ILIKE '%ludacris%'
 ```
 
-## Write a query that returns all rows for which the first artist listed in the group has a name that begins with "DJ".
+### Write a query that returns all rows for which the first artist listed in the group has a name that begins with "DJ".
 
 ```{sql}
 SELECT *
@@ -283,7 +281,7 @@ SELECT *
 ```
 
 
-# IN
+## SQL IN
 
 ```{sql}
 SELECT *
@@ -296,7 +294,7 @@ SELECT *
  WHERE year_rank = 1 OR year_rank = 2 OR year_rank = 3
 ```
 
-## Write a query that shows all of the entries for Elvis and M.C. Hammer.
+### Write a query that shows all of the entries for Elvis and M.C. Hammer.
 
 ```{sql}
 SELECT *
@@ -318,8 +316,7 @@ tutorial.billboard_top_100_year_end %>% filter (artist %in% c('Elvis Presley','M
 tutorial.billboard_top_100_year_end[tutorial.billboard_top_100_year_end$artist %in% c('Elvis Presley','M.C. Hammer', 'Hammer'), ]
 ```
 
-
-# BETWEEN
+## SQL BETWEEN
 
 ```{sql}
 SELECT *
@@ -343,9 +340,9 @@ SELECT *
 ```
 
 
-# IS NULL
+## SQL IS NULL
 
-## Write a query that shows all of the rows for which song_name is null.
+### Write a query that shows all of the rows for which song_name is null.
 
 ```{sql}
 SELECT *
@@ -353,9 +350,9 @@ SELECT *
  WHERE song_name IS NULL
 ```
 
-# SQL AND
+## SQL AND
 
-## Write a query that surfaces all rows for top-10 hits for which Ludacris is part of the Group.
+### Write a query that surfaces all rows for top-10 hits for which Ludacris is part of the Group.
 
 ```{sql}
 SELECT *
@@ -364,7 +361,7 @@ SELECT *
    AND "group" ILIKE '%ludacris%'
 ```
 
-## Write a query that surfaces the top-ranked records in 1990, 2000, and 2010.
+### Write a query that surfaces the top-ranked records in 1990, 2000, and 2010.
 
 ```{sql}}
 SELECT *
@@ -373,7 +370,7 @@ SELECT *
    AND year IN (1990,2000,2010)
 ```
 
-## Write a query that lists all songs from the 1960s with "love" in the title.
+### Write a query that lists all songs from the 1960s with "love" in the title.
 
 ```{sql}
 SELECT *
@@ -382,9 +379,9 @@ SELECT *
    AND song_name ILIKE '%love%'
 ```
 
-# SQL OR
+## SQL OR
 
-## Write a query that returns all rows for top-10 songs that featured either Katy Perry or Bon Jovi.
+### Write a query that returns all rows for top-10 songs that featured either Katy Perry or Bon Jovi.
 
 ```{sql}
 SELECT *
@@ -395,7 +392,7 @@ SELECT *
 ```
 
 
-## Write a query that returns all songs with titles that contain the word "California" in either the 1970s or 1990s.
+### Write a query that returns all songs with titles that contain the word "California" in either the 1970s or 1990s.
 
 ```{sql}
 SELECT *
@@ -404,7 +401,7 @@ SELECT *
    AND (year BETWEEN 1970 AND 1979 OR year BETWEEN 1990 AND 1999)
 ```
 
-## Write a query that lists all top-100 recordings that feature Dr. Dre before 2001 or after 2009.
+### Write a query that lists all top-100 recordings that feature Dr. Dre before 2001 or after 2009.
 
 ```{sql}
 SELECT *
@@ -413,7 +410,7 @@ SELECT *
    AND (year < 2001 OR year > 2009)
 ```
 
-# SQL NOT
+## SQL NOT
 
 
 ```{sql}
@@ -430,7 +427,7 @@ SELECT *
 ```
 
 
-## Write a query that returns all rows for songs that were on the charts in 2013 and do not contain the letter "a".
+### Write a query that returns all rows for songs that were on the charts in 2013 and do not contain the letter "a".
 
 ```{sql}
 SELECT *
@@ -439,9 +436,9 @@ SELECT *
    AND song_name NOT ILIKE '%a%'
 ```
 
-# SQL ORDER BY
+## SQL ORDER BY
 
-## Write a query that returns all rows from 2012, ordered by song title from Z to A.
+### Write a query that returns all rows from 2012, ordered by song title from Z to A.
 
 ```{sql}
 SELECT *
@@ -451,7 +448,7 @@ ORDER BY song_name DESC
 ```
 
 
-## Write a query that returns all rows from 2010 ordered by rank, with artists ordered alphabetically for each song.
+### Write a query that returns all rows from 2010 ordered by rank, with artists ordered alphabetically for each song.
 
 ```{sql}
 SELECT *
@@ -461,7 +458,7 @@ ORDER BY year_rank, artist
 ```
 
 
-## Write a query that shows all rows for which T-Pain was a group member, ordered by rank on the charts, from lowest to highest rank (from 100 to 1).
+### Write a query that shows all rows for which T-Pain was a group member, ordered by rank on the charts, from lowest to highest rank (from 100 to 1).
 
 ```{sql}
 SELECT *
@@ -471,7 +468,7 @@ ORDER BY year_rank DESC
 ```
 
 
-## Write a query that returns songs that ranked between 10 and 20 (inclusive) in 1993, 2003, or 2013. Order the results by year and rank, and leave a comment on each line of the WHERE clause to indicate what that line does
+### Write a query that returns songs that ranked between 10 and 20 (inclusive) in 1993, 2003, or 2013. Order the results by year and rank, and leave a comment on each line of the WHERE clause to indicate what that line does
 
 ```{sql}
 SELECT *

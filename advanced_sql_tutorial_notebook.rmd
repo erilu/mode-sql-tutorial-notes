@@ -1,0 +1,30 @@
+---
+title: "Advanced SQL Tutorial Exercises and Notes"
+output: html_document
+---
+
+# Advanced SQL Tutorial Exercises and Notes
+
+
+## SQL Data Types
+
+
+## SQL Date Format
+
+
+## Data Wrangling in SQL
+
+
+## Using SQL String Functions to Clean Data
+
+
+## Writing Subqueries in SQL
+
+
+## SQL Window Functions
+
+
+## Performance Tuning SQL Queries
+
+
+## Pivoting Data in SQL
