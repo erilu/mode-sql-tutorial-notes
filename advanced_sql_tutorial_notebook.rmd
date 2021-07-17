@@ -5,23 +5,257 @@ output: html_document
 
 # Advanced SQL Tutorial Exercises and Notes
 
-
 ## SQL Data Types
 
+### Convert the funding_total_usd and founded_at_clean columns in the tutorial.crunchbase_companies_clean_date table to strings (varchar format) using a different formatting function for each one
+
+```{sql}
+SELECT CAST(founded_at_clean AS VARCHAR) AS founded_at_clean_varchar,
+       funding_total_usd::VARCHAR AS funding_total_usd_varchar
+FROM tutorial.crunchbase_companies_clean_date
+```
 
 ## SQL Date Format
 
+```{sql}
+SELECT companies.permalink,
+       companies.founded_at_clean,
+       acquisitions.acquired_at_cleaned,
+       acquisitions.acquired_at_cleaned -
+         companies.founded_at_clean::timestamp AS time_to_acquisition
+  FROM tutorial.crunchbase_companies_clean_date companies
+  JOIN tutorial.crunchbase_acquisitions_clean_date acquisitions
+    ON acquisitions.company_permalink = companies.permalink
+ WHERE founded_at_clean IS NOT NULL
+ 
+ -- returns the interval in number of days
+ 
+ SELECT companies.permalink,
+       companies.founded_at_clean,
+       companies.founded_at_clean::timestamp +
+         INTERVAL '1 week' AS plus_one_week
+  FROM tutorial.crunchbase_companies_clean_date companies
+ WHERE founded_at_clean IS NOT NULL
+ 
+ -- returns the date plus exactly 1 week
+ 
+ 
+```
+
+### Write a query that counts the number of companies acquired within 3 years, 5 years, and 10 years of being founded (in 3 separate columns). Include a column for total companies acquired as well. Group by category and limit to only rows with a founding date.
+
+```{sql}
+SELECT companies.category_code,
+       COUNT(*) AS total_acquisitions,
+       
+       -- this is the provided solution
+       COUNT(CASE WHEN acquisitions.acquired_at_cleaned <= companies.founded_at_clean::timestamp + INTERVAL '3 years'
+                       THEN 1 ELSE NULL END) AS acquired_3_yrs,
+       COUNT(CASE WHEN acquisitions.acquired_at_cleaned <= companies.founded_at_clean::timestamp + INTERVAL '5 years'
+                       THEN 1 ELSE NULL END) AS acquired_5_yrs,
+       COUNT(CASE WHEN acquisitions.acquired_at_cleaned <= companies.founded_at_clean::timestamp + INTERVAL '10 years'
+                       THEN 1 ELSE NULL END) AS acquired_10_yrs,
+                       
+      -- this is what I first came up with, but it provides different results, even though it looks like it should be the same.
+       COUNT(CASE WHEN acquisitions.acquired_at_cleaned - companies.founded_at_clean::timestamp  <= INTERVAL '3 years' 
+       THEN 'within_3_years' ELSE NULL END) AS acquired_within_3,
+       COUNT(CASE WHEN acquisitions.acquired_at_cleaned - companies.founded_at_clean::timestamp <= INTERVAL '5 years' 
+       THEN 'within_5_years' ELSE NULL END) AS acquired_within_5,
+       COUNT(CASE WHEN acquisitions.acquired_at_cleaned - companies.founded_at_clean::timestamp <= INTERVAL '10 years' 
+       THEN 'within_10_years' ELSE NULL END) AS acquired_within_10
+  FROM tutorial.crunchbase_companies_clean_date companies
+  JOIN tutorial.crunchbase_acquisitions_clean_date acquisitions
+ ON companies.permalink = acquisitions.company_permalink
+ WHERE companies.founded_at_clean IS NOT NULL
+ GROUP BY companies.category_code
+ ORDER BY 2 DESC
+```
+
+This shows that when using comparison operators on dates, always compare dates to other dates, and add the difference between dates as timestamps (rather than comparing intervals, which may produce results like the above).
 
 ## Data Wrangling in SQL
 
-
 ## Using SQL String Functions to Clean Data
+
+The TRIM function is interesting, in that the order of the characters that you specify trimmed doesn't matter - it will search the leading or trailing ends (if 'both' is selected) for any of the characters and trim them off if they occur sequentially. If not specified, it will trim whitespace.
+
+
+### Write a query that separates the `location` field into separate fields for latitude and longitude. You can compare your results against the actual `lat` and `lon` fields in the table.
+```{sql}
+-- this makes the lat and lon have the same number of digits as the actual fields in the table
+SELECT location,
+       lat,
+       lon,
+       LEFT(TRIM(both '()' FROM location), 7) AS sep_lat,
+       SUBSTR(location, POSITION(',' IN location)+2, 9) AS sep_lon
+  FROM tutorial.sf_crime_incidents_2014_01
+  
+  
+-- this obtains all the significant digits provided by the location field
+SELECT location,
+       TRIM(leading '(' FROM LEFT(location, POSITION(',' IN location) - 1)) AS lattitude,
+       TRIM(trailing ')' FROM RIGHT(location, LENGTH(location) - POSITION(',' IN location) ) ) AS longitude
+  FROM tutorial.sf_crime_incidents_2014_01
+```
+
+
+### Concatenate the lat and lon fields to form a field that is equivalent to the location field. (Note that the answer will have a different decimal precision.)
+```{sql}
+SELECT location,
+       lat,
+       lon,
+       CONCAT ('(', lat, ', ', lon, ')') AS concat_location
+  FROM tutorial.sf_crime_incidents_2014_01
+```
+
+### Create the same concatenated location field, but using the || syntax instead of CONCAT.
+```{sql}
+SELECT location,
+       lat,
+       lon,
+       '(' || lat || ', ' || lon || ')' AS concat_location
+  FROM tutorial.sf_crime_incidents_2014_01
+```
+
+### Write a query that creates a date column formatted YYYY-MM-DD.
+```{sql}
+SELECT date,
+       CONCAT ( SUBSTR (date, 7, 4), '-', LEFT(date,2),'-', SUBSTR(date, 4, 2) ) AS reformatted_date
+  FROM tutorial.sf_crime_incidents_2014_01
+```
+
+### Write a query that returns the `category` field, but with the first letter capitalized and the rest of the letters in lower-case.
+```{sql}
+SELECT category,
+       UPPER(LEFT (category,1)) || LOWER(RIGHT(category, LENGTH(category)-1)) AS category_resized
+  FROM tutorial.sf_crime_incidents_2014_01
+  
+  -- another option using SUBSTR
+  
+SELECT category,
+       UPPER(LEFT (category,1)) || LOWER(SUBSTR(category, 2, LENGTH(category)-1)) AS category_resized
+  FROM tutorial.sf_crime_incidents_2014_01
+```
+
+### Write a query that creates an accurate timestamp using the date and time columns in tutorial.sf_crime_incidents_2014_01. Include a field that is exactly 1 week later as well.
+
+```{sql}
+SELECT incidnt_num,
+       date,
+       time,
+       (SUBSTR(date, 7, 4) || '-' || LEFT(date, 2) ||
+        '-' || SUBSTR(date, 4, 2) || ' ' || time || ':00')::timestamp AS cleaned_date,
+       (SUBSTR(date, 7, 4) || '-' || LEFT(date, 2) ||
+        '-' || SUBSTR(date, 4, 2) || ' ' || time || ':00')::timestamp + INTERVAL '1 week' AS one_week_later_date
+  FROM tutorial.sf_crime_incidents_2014_01
+```
+
+Way to extract components from the cleaned date:
+
+```{sql}
+SELECT cleaned_date,
+       EXTRACT('year'   FROM cleaned_date) AS year,
+       EXTRACT('month'  FROM cleaned_date) AS month,
+       EXTRACT('day'    FROM cleaned_date) AS day,
+       EXTRACT('hour'   FROM cleaned_date) AS hour,
+       EXTRACT('minute' FROM cleaned_date) AS minute,
+       EXTRACT('second' FROM cleaned_date) AS second,
+       EXTRACT('decade' FROM cleaned_date) AS decade,
+       EXTRACT('dow'    FROM cleaned_date) AS day_of_week
+  FROM tutorial.sf_crime_incidents_cleandate
+```
+
+
+### Write a query that counts the number of incidents reported by week. Cast the week as a date to get rid of the hours/minutes/seconds.
+```{sql}
+SELECT DATE_TRUNC('week', cleaned_date)::date AS week,
+       COUNT(incidnt_num) as num_incidents
+  FROM tutorial.sf_crime_incidents_cleandate
+  GROUP BY 1
+  ORDER BY 1
+```
+
+### Write a query that shows exactly how long ago each indicent was reported. Assume that the dataset is in Pacific Standard Time (UTC - 8).
+```{sql}
+SELECT incidnt_num,
+       cleaned_date,
+       NOW() AT TIME ZONE 'PST' AS time_now,
+       NOW() AT TIME ZONE 'PST' - cleaned_date AS time_since_incident
+  FROM tutorial.sf_crime_incidents_cleandate
+```
+
+### COALESCE to fill in NULL values
+
+```{sql}
+--useful way to fill in null values for a column with a specified replacement value
+
+SELECT incidnt_num,
+       descript,
+       COALESCE(descript, 'No Description')
+  FROM tutorial.sf_crime_incidents_cleandate
+ ORDER BY descript DESC
+```
 
 
 ## Writing Subqueries in SQL
 
+### Write a query that selects all Warrant Arrests from the tutorial.sf_crime_incidents_2014_01 dataset, then wrap it in an outer query that only displays unresolved incidents.
+
+```{sql}
+
+```
+
+### Write a query that displays the average number of monthly incidents for each category. Hint: use tutorial.sf_crime_incidents_cleandate to make your life a little easier.
+
+```{sql}
+
+```
+### Write a query that displays all rows from the three categories with the fewest incidents reported.
+
+```{sql}
+
+```
+### Write a query that counts the number of companies founded and acquired by quarter starting in Q1 2012. Create the aggregations in two separate queries, then join them.
+```{sql}
+
+```
+### Write a query that ranks investors from the combined dataset above by the total number of investments they have made.
+```{sql}
+
+```
+### Write a query that does the same thing as in the previous problem, except only for companies that are still operating. Hint: operating status is in tutorial.crunchbase_companies.
+```{sql}
+
+```
+
 
 ## SQL Window Functions
+
+
+### Write a query modification of the above example query that shows the duration of each ride as a percentage of the total time accrued by riders from each start_terminal
+
+```{sql}
+
+```
+
+### Write a query that shows a running total of the duration of bike rides (similar to the last example), but grouped by end_terminal, and with ride duration sorted in descending order.
+
+```{sql}
+
+```
+
+### Write a query that shows the 5 longest rides from each starting terminal, ordered by terminal, and longest to shortest rides within each terminal. Limit to rides that occurred before Jan. 8, 2012.
+
+```{sql}
+
+```
+
+
+### Write a query that shows only the duration of the trip and the percentile into which that duration falls (across the entire dataset—not partitioned by terminal).
+
+```{sql}
+
+```
 
 
 ## Performance Tuning SQL Queries

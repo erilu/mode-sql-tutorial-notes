@@ -1,0 +1,18 @@
+---
+title: "SQL Analytics Training Section Cases"
+output: html_document
+---
+
+# SQL Analytics Training Section Case Studies
+
+## Investigating a Drop in User Engagement
+
+## Understanding Search Functionality
+
+## Validating A/B Test Results
+
+
+```{r}
+
+```
+
