@@ -202,27 +202,100 @@ SELECT incidnt_num,
 ### Write a query that selects all Warrant Arrests from the tutorial.sf_crime_incidents_2014_01 dataset, then wrap it in an outer query that only displays unresolved incidents.
 
 ```{sql}
-
+SELECT sub.*
+  FROM (
+        SELECT *
+          FROM tutorial.sf_crime_incidents_2014_01
+         WHERE descript = 'WARRANT ARREST'
+       ) sub
+ WHERE sub.resolution = 'NONE'
 ```
 
 ### Write a query that displays the average number of monthly incidents for each category. Hint: use tutorial.sf_crime_incidents_cleandate to make your life a little easier.
 
 ```{sql}
+SELECT 
+       sub.category,
+       AVG(sub.incidents) AS average_incidents
+  FROM (
+        SELECT 
+               DATE_TRUNC('month'  , cleaned_date) AS month,
+               category,
+               COUNT(incidnt_num) AS incidents
+          FROM tutorial.sf_crime_incidents_cleandate
+         GROUP BY 1,2
+       ) sub
+ GROUP BY 1
+ ORDER BY 1
+```
+
+
+```{sql}
+SELECT sub.month,
+       AVG(sub.volume_sum) AS avg_volume_per_month
+FROM
+(SELECT year,
+       month,
+       SUM(volume) AS volume_sum
+  FROM tutorial.aapl_historical_stock_price
+ GROUP BY year, month
+ ORDER BY year, month) sub
+ GROUP BY 1
+ ORDER BY 1
 
 ```
+
 ### Write a query that displays all rows from the three categories with the fewest incidents reported.
 
 ```{sql}
+SELECT incidents.*,
+       sub.incidents AS incidents_in_category
+  FROM tutorial.sf_crime_incidents_2014_01 incidents
+  JOIN ( SELECT category,
+          COUNT(incidnt_num) AS incidents
+           FROM tutorial.sf_crime_incidents_2014_01
+          GROUP BY 1
+          ORDER BY 2
+          LIMIT 3
+       ) sub
+    ON incidents.category = sub.category
+ ORDER BY sub.incidents
+```
+
+### BONUS Exercise
+
+I applied the subquery method to revisit one of the previous exercises, which used a self-join, since the methods seemed fairly similar in their utility. This code also lists the companies which had GBR investors after an initial investment in japan.
+
+```{sql}
+
+ SELECT DISTINCT japan_investments.company_name,
+       japan_investments.company_permalink
+  FROM tutorial.crunchbase_investments_part1 japan_investments
+  JOIN ( SELECT gb_investments.investor_country_code,
+                gb_investments.company_name,
+                gb_investments.funded_at
+          FROM tutorial.crunchbase_investments_part1 gb_investments
+          WHERE gb_investments.investor_country_code = 'GBR') sub
+   ON japan_investments.company_name = sub.company_name     
+  AND sub.funded_at > japan_investments.funded_at
+  WHERE japan_investments.investor_country_code = 'JPN'
+  ORDER BY 1
 
 ```
+
 ### Write a query that counts the number of companies founded and acquired by quarter starting in Q1 2012. Create the aggregations in two separate queries, then join them.
+
 ```{sql}
 
 ```
+
+
 ### Write a query that ranks investors from the combined dataset above by the total number of investments they have made.
 ```{sql}
 
 ```
+
+
 ### Write a query that does the same thing as in the previous problem, except only for companies that are still operating. Hint: operating status is in tutorial.crunchbase_companies.
 ```{sql}
 
