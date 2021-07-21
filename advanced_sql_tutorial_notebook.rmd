@@ -352,7 +352,7 @@ COUNT(investments.*) AS total_investments
   GROUP BY 1
   ORDER BY 2 DESC
   
--- for some reason this query took slower to run / didn't run at all, even though the subqueries make sense, and selecting the joined subqueries works. when we try group by counting, it stops working, even though it should technically work. the query below is the answer provided by the tutorial but even this one doesn't run. the difference is that the WHERE clause is applied to the table after the join, whereas I applied the WHERE to filter for operating companies before joining.
+--the query below is the answer provided by the tutorial. the difference is that the WHERE clause is applied to the table after the join, whereas I applied the WHERE to filter for operating companies before joining. both give the same result
 
 SELECT investments.investor_name,
        COUNT(investments.*) AS investments
