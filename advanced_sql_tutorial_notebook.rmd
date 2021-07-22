@@ -375,31 +375,131 @@ SELECT investments.investor_name,
 
 ## SQL Window Functions
 
+Self practice - if i wanted to filter the results by when the rolling sum is greater than 1000, can do a subquery of the results from the window function query.
+
+```{sql}
+
+
+SELECT *
+FROM (
+SELECT start_time,
+       start_terminal,
+       duration_seconds,
+       SUM(duration_seconds) OVER
+         (PARTITION BY start_terminal ORDER BY start_time) AS start_terminal_total
+  FROM tutorial.dc_bikeshare_q1_2012
+ WHERE start_time < '2012-01-08'
+ ) sub
+ WHERE sub.start_terminal_total > 1000
+```
 
 ### Write a query modification of the above example query that shows the duration of each ride as a percentage of the total time accrued by riders from each start_terminal
 
 ```{sql}
 
+SELECT sub.start_time,
+       sub.start_terminal,
+       sub.duration_seconds / sub.start_terminal_total *100 AS percent_time
+  FROM (
+        SELECT start_time,
+               start_terminal,
+               duration_seconds,
+               SUM(duration_seconds) OVER
+                 (PARTITION BY start_terminal) AS start_terminal_total
+          FROM tutorial.dc_bikeshare_q1_2012
+         WHERE start_time < '2012-01-08'
+       ) sub
+  ORDER BY 2,3 DESC
+
+-- giving the same result wihtout a subquery
+SELECT start_time,
+       start_terminal,
+       duration_seconds,
+       SUM(duration_seconds) OVER
+         (PARTITION BY start_terminal) AS start_terminal_total,
+       duration_seconds / SUM(duration_seconds) OVER (PARTITION BY start_terminal) *100 AS percent_time
+  FROM tutorial.dc_bikeshare_q1_2012
+ WHERE start_time < '2012-01-08'
+ ORDER BY 2,5 DESC
+
+-- double check that it worked by seeing if all the percents grouped by terminal sum up to 100:
+SELECT sub2.start_terminal,
+       SUM (sub2.percent_time)
+  FROM (
+        SELECT sub.start_time,
+               sub.start_terminal,
+               sub.duration_seconds / sub.start_terminal_total *100 AS percent_time
+          FROM (
+                SELECT start_time,
+                       start_terminal,
+                       duration_seconds,
+                       SUM(duration_seconds) OVER
+                         (PARTITION BY start_terminal) AS start_terminal_total
+                  FROM tutorial.dc_bikeshare_q1_2012
+                 WHERE start_time < '2012-01-08'
+               ) sub
+         
+         ) sub2
+ GROUP BY 1
 ```
 
 ### Write a query that shows a running total of the duration of bike rides (similar to the last example), but grouped by end_terminal, and with ride duration sorted in descending order.
 
 ```{sql}
-
+SELECT end_terminal,
+       duration_seconds,
+       SUM(duration_seconds) OVER
+         (PARTITION BY end_terminal ORDER BY duration_seconds DESC)
+         AS running_total
+  FROM tutorial.dc_bikeshare_q1_2012
+ WHERE start_time < '2012-01-08'
 ```
 
 ### Write a query that shows the 5 longest rides from each starting terminal, ordered by terminal, and longest to shortest rides within each terminal. Limit to rides that occurred before Jan. 8, 2012.
 
 ```{sql}
-
+SELECT *
+  FROM (
+      SELECT start_terminal,
+             start_time,
+             duration_seconds,
+             RANK() OVER (PARTITION BY start_terminal ORDER BY duration_seconds DESC)
+                          AS row_rank
+        FROM tutorial.dc_bikeshare_q1_2012
+       WHERE start_time < '2012-01-08'
+   ) sub
+ WHERE sub.row_rank <=5
 ```
 
 
 ### Write a query that shows only the duration of the trip and the percentile into which that duration falls (across the entire dataset—not partitioned by terminal).
 
 ```{sql}
-
+SELECT duration_seconds,
+       NTILE(100) OVER
+         (ORDER BY duration_seconds)
+         AS percentile
+  FROM tutorial.dc_bikeshare_q1_2012
+ WHERE start_time < '2012-01-08'
+ ORDER BY 1
 ```
+
+Window functions
+
+https://www.postgresql.org/docs/8.4/functions-window.html
+
+Function	Return Type	Description
+* row_number()	bigint	number of the current row within its partition, counting from 1
+* rank()	bigint	rank of the current row with gaps; same as row_number of its first peer
+* dense_rank()	bigint	rank of the current row without gaps; this function counts peer groups
+* percent_rank()	double precision	relative rank of the current row: (rank - 1) / (total rows - 1)
+* cume_dist()	double precision	relative rank of the current row: (number of rows preceding or peer with current row) / (total rows)
+* ntile(num_buckets integer)	integer	integer ranging from 1 to the argument value, dividing the partition as equally as possible
+* lag(value any [, offset integer [, default any ]])	same type as value	returns value evaluated at the row that is offset rows before the current row within the partition; if there is no such row, instead return default. Both offset and default are evaluated with respect to the current row. If omitted, offset defaults to 1 and default to null
+* lead(value any [, offset integer [, default any ]])	same type as value	returns value evaluated at the row that is offset rows after the current row within the partition; if there is no such row, instead return default. Both offset and default are evaluated with respect to the current row. If omitted, offset defaults to 1 and default to null
+* first_value(value any)	same type as value	returns value evaluated at the row that is the first row of the window frame
+* last_value(value any)	same type as value	returns value evaluated at the row that is the last row of the window frame
+* nth_value(value any, nth integer)	same type as value	returns value evaluated at the row that is the nth row of the window frame (counting from 1); null if no such row
 
 
 ## Performance Tuning SQL Queries
