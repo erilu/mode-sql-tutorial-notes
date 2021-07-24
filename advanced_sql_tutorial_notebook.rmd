@@ -501,8 +501,37 @@ Function	Return Type	Description
 * last_value(value any)	same type as value	returns value evaluated at the row that is the last row of the window frame
 * nth_value(value any, nth integer)	same type as value	returns value evaluated at the row that is the nth row of the window frame (counting from 1); null if no such row
 
-
 ## Performance Tuning SQL Queries
 
+```{sql}
+-- slow query since it has to join all rows before aggregation
+
+SELECT teams.conference AS conference,
+       players.school_name,
+       COUNT(1) AS players
+  FROM benn.college_football_players players
+  JOIN benn.college_football_teams teams
+    ON teams.school_name = players.school_name
+ GROUP BY 1,2
+ 
+ 
+ -- faster query because it joins less rows (aggregate first, then join)
+
+SELECT teams.conference,
+       sub.*
+  FROM (
+        SELECT players.school_name,
+               COUNT(*) AS players
+          FROM benn.college_football_players players
+         GROUP BY 1
+       ) sub
+  JOIN benn.college_football_teams teams
+  ON teams.school_name = sub.school_name
+```
 
 ## Pivoting Data in SQL
+
+```{sql}
+
+```
+
