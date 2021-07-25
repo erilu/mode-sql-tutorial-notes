@@ -531,7 +531,39 @@ SELECT teams.conference,
 
 ## Pivoting Data in SQL
 
-```{sql}
+This chapter shows how to pivot data in SQL, very similar to using the reshape package in R (changing long format to wide format data, and vice versa. "melting" and "casting" columns).
 
+```{sql}
+-- data in long format
+
+SELECT teams.conference AS conference,
+       players.year,
+       COUNT(1) AS players
+  FROM benn.college_football_players players
+  JOIN benn.college_football_teams teams
+    ON teams.school_name = players.school_name
+ GROUP BY 1,2
+ ORDER BY 1,2
+
+
+-- to make new columns based on players.year, this would be the SQL query required.
+
+SELECT conference,
+       SUM(players) AS total_players,
+       SUM(CASE WHEN year = 'FR' THEN players ELSE NULL END) AS fr,
+       SUM(CASE WHEN year = 'SO' THEN players ELSE NULL END) AS so,
+       SUM(CASE WHEN year = 'JR' THEN players ELSE NULL END) AS jr,
+       SUM(CASE WHEN year = 'SR' THEN players ELSE NULL END) AS sr
+  FROM (
+        SELECT teams.conference AS conference,
+               players.year,
+               COUNT(1) AS players
+          FROM benn.college_football_players players
+          JOIN benn.college_football_teams teams
+            ON teams.school_name = players.school_name
+         GROUP BY 1,2
+       ) sub
+ GROUP BY 1
+ ORDER BY 2 DESC
 ```
 
